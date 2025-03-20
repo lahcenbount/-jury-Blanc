@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { projectService, taskService, resourceService } from '../services/api';
 
-// Reusable Form Component for Projects, Tasks, and Resources
+// Composant de formulaire réutilisable pour Projets, Tâches et Ressources
 const EntityForm = ({ entity, newEntity, setNewEntity, handleSubmit, editingId, fields }) => (
   <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md mb-8">
     <h2 className="text-xl font-semibold mb-4">{editingId ? 'Modifier' : 'Nouveau'} {entity}</h2>
@@ -34,6 +34,7 @@ const EntityForm = ({ entity, newEntity, setNewEntity, handleSubmit, editingId, 
             onChange={(e) => setNewEntity({ ...newEntity, [field.name]: e.target.value })}
             className="p-2 border rounded"
             required={field.required}
+            min={field.name === 'budget' || field.name === 'quantity' ? 1 : undefined} // Validation min pour budget et quantité
           />
         );
       })}
@@ -45,7 +46,7 @@ const EntityForm = ({ entity, newEntity, setNewEntity, handleSubmit, editingId, 
 );
 
 const ProjectManager = ({ activeTab }) => {
-  // State pour les entités et formulaires
+  // États pour les entités et formulaires
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [resources, setResources] = useState([]);
@@ -92,13 +93,13 @@ const ProjectManager = ({ activeTab }) => {
     fetchData();
   }, [activeTab, newTask.project]);
 
-  // Fields pour chaque formulaire
+  // Champs pour chaque formulaire
   const projectFields = [
     { name: 'name', placeholder: 'Nom du projet', required: true },
     { name: 'description', placeholder: 'Description', required: true },
     { name: 'startDate', placeholder: 'Date de début', type: 'date', required: true },
     { name: 'endDate', placeholder: 'Date de fin', type: 'date', required: true },
-    { name: 'budget', placeholder: 'Budget', type: 'number' }
+    { name: 'budget', placeholder: 'Budget', type: 'number', required: true }
   ];
 
   const taskFields = [
@@ -130,6 +131,13 @@ const ProjectManager = ({ activeTab }) => {
   // Gérer les soumissions de formulaire
   const handleProjectSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validation du budget
+    if (newProject.budget <= 0) {
+      setError('Le budget doit être un nombre positif');
+      return;
+    }
+
     try {
       if (editingId) {
         const response = await projectService.update(editingId, newProject);
@@ -166,6 +174,13 @@ const ProjectManager = ({ activeTab }) => {
 
   const handleResourceSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validation de la quantité
+    if (newResource.quantity <= 0) {
+      setError('La quantité doit être un nombre positif');
+      return;
+    }
+
     try {
       if (editingId) {
         const response = await resourceService.update(editingId, newResource);
@@ -238,7 +253,7 @@ const ProjectManager = ({ activeTab }) => {
                 <div className="text-sm space-y-1">
                   <p>📅 Début: {new Date(project.startDate).toLocaleDateString()}</p>
                   <p>📅 Fin: {new Date(project.endDate).toLocaleDateString()}</p>
-                  <p>💰 Budget: {project.budget}€</p>
+                  <p> Budget: {project.budget}€</p>
                 </div>
                 <div className="mt-4 flex gap-2">
                   <button onClick={() => {
@@ -283,7 +298,7 @@ const ProjectManager = ({ activeTab }) => {
                   <div className="text-sm space-y-1">
                     <p>📅 Début: {new Date(task.startDate).toLocaleDateString()}</p>
                     {task.endDate && <p>📅 Fin: {new Date(task.endDate).toLocaleDateString()}</p>}
-                    <p>🔄 Statut: {task.status}</p>
+                    <p> Statut: {task.status}</p>
                   </div>
                   <div className="mt-4 flex gap-2">
                     <button onClick={() => {
@@ -325,18 +340,23 @@ const ProjectManager = ({ activeTab }) => {
               <div key={resource._id} className="bg-white p-4 rounded-lg shadow-md">
                 <h3 className="font-semibold text-lg mb-2">{resource.name}</h3>
                 <div className="text-sm space-y-1">
-                  <p>📦 Type: {resource.type}</p>
+                  <p>Type: {resource.type}</p>
                   <p>🔢 Quantité: {resource.quantity}</p>
                   {resource.supplier && (
                     <>
-                      <p>🏭 Fournisseur: {resource.supplier.name}</p>
-                      <p>📞 Contact: {resource.supplier.contact}</p>
+                      <p>Fournisseur: {resource.supplier.name}</p>
+                      <p>Contact: {resource.supplier.contact}</p>
                     </>
                   )}
                 </div>
+                
                 <div className="mt-4 flex gap-2">
                   <button onClick={() => {
-                    setNewResource(resource);
+                    setNewResource({
+                      ...resource,
+                      quantity: resource.quantity,
+                      supplier: { name: resource.supplier?.name, contact: resource.supplier?.contact }
+                    });
                     setEditingId(resource._id);
                   }} className="text-blue-500 hover:text-blue-700">
                     ✏️ Modifier
