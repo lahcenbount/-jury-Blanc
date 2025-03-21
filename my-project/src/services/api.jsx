@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Création d'une instance axios avec l'URL de base
 const API = axios.create({
-  baseURL: 'http://localhost:5001', // Utilisez la même PORT que dans votre .env
+  baseURL: 'http://localhost:5001', 
   headers: {
     'Content-Type': 'application/json'
   }

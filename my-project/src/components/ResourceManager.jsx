@@ -1,160 +1,194 @@
-import { useState, useEffect } from 'react';
-import { getResources, createResource, updateResource, deleteResource } from '../api/api';
+import React, { useState, useEffect } from "react";
 
-const ResourceManager = () => {
-  const [resources, setResources] = useState([]);
-  const [formData, setFormData] = useState({
-    name: '',
-    type: '',
-    quantity: '',
-    supplierInfo: ''
-  });
-  const [editId, setEditId] = useState(null);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const loadResources = async () => {
-      try {
-        setLoading(true);
-        const data = await getResources();
-        setResources(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError('Failed to load resources');
-      } finally {
-        setLoading(false);
+const resourceService = {
+  getAll: () => Promise.resolve({ 
+    data: [
+      {
+        id: "1",
+        name: "Jean Dupont",
+        role: "Développeur Frontend",
+        email: "jean.dupont@example.com",
+        phone: "06 12 34 56 78",
+        availability: "Disponible",
+        skills: "React, JavaScript, CSS",
+        projectId: "1"
+      },
+      {
+        id: "2",
+        name: "Marie Martin",
+        role: "Développeur Backend",
+        email: "marie.martin@example.com",
+        phone: "06 23 45 67 89",
+        availability: "Partiellement disponible",
+        skills: "Node.js, Express, MongoDB",
+        projectId: "1"
+      },
+      {
+        id: "3",
+        name: "Sophie Laurent",
+        role: "Designer UX/UI",
+        email: "sophie.laurent@example.com",
+        phone: "06 34 56 78 90",
+        availability: "Non disponible",
+        skills: "Figma, Adobe XD, Sketch",
+        projectId: "2"
       }
-    };
+    ] 
+  }),
+  create: (resource) => Promise.resolve({ data: resource }),
+  update: (id, resource) => Promise.resolve({ data: resource }),
+  delete: (id) => Promise.resolve({ data: {} })
+};
+
+const ResourceManager = ({ activeTab, openForm }) => {
+  const [resources, setResources] = useState([]);
+  const [filter, setFilter] = useState("all"); // all, available, partial, unavailable
+  
+  useEffect(() => {
     loadResources();
   }, []);
 
-  const validateForm = () => {
-    if (!formData.name.trim()) return 'Name is required';
-    if (!formData.type.trim()) return 'Type is required';
-    if (formData.quantity <= 0) return 'Quantity must be positive';
-    return '';
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationError = validateForm();
-    if (validationError) return setError(validationError);
-
+  const loadResources = async () => {
     try {
-      setLoading(true);
-      setError('');
-
-      if (editId) {
-        const updated = await updateResource(editId, formData);
-        setResources(resources.map(r => r.id === editId ? updated : r));
-      } else {
-        const newResource = await createResource(formData);
-        setResources([...resources, newResource]);
-      }
-
-      setFormData({ name: '', type: '', quantity: '', supplierInfo: '' });
-      setEditId(null);
-    } catch (err) {
-      setError(err.message || 'Operation failed');
-    } finally {
-      setLoading(false);
+      const response = await resourceService.getAll();
+      setResources(response.data);
+    } catch (error) {
+      console.error("Failed to load resources:", error);
     }
   };
 
-  const handleEdit = (resource) => {
-    setFormData({
-      name: resource.name,
-      type: resource.type,
-      quantity: resource.quantity,
-      supplierInfo: resource.supplierInfo
-    });
-    setEditId(resource.id);
+  const handleCreateResource = () => {
+    openForm(null); // Null indicates a new resource
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this resource?')) {
+  const handleEditResource = (resource) => {
+    openForm(resource);
+  };
+
+  const handleDeleteResource = async (id) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette ressource ?")) {
       try {
-        await deleteResource(id);
-        setResources(resources.filter(r => r.id !== id));
-      } catch (err) {
-        setError('Failed to delete resource');
+        await resourceService.delete(id);
+        setResources(resources.filter(resource => resource.id !== id));
+      } catch (error) {
+        console.error("Failed to delete resource:", error);
       }
     }
   };
+
+  const getAvailabilityColor = (availability) => {
+    switch(availability.toLowerCase()) {
+      case "disponible":
+        return "bg-green-100 text-green-800";
+      case "partiellement disponible":
+        return "bg-yellow-100 text-yellow-800";
+      case "non disponible":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const filteredResources = resources.filter(resource => {
+    if (filter === "all") return true;
+    if (filter === "available" && resource.availability.toLowerCase() === "disponible") return true;
+    if (filter === "partial" && resource.availability.toLowerCase() === "partiellement disponible") return true;
+    if (filter === "unavailable" && resource.availability.toLowerCase() === "non disponible") return true;
+    return false;
+  });
 
   return (
-    <div className="resource-manager">
-      <h2>Manage Resources</h2>
-
-      <form onSubmit={handleSubmit} className="resource-form">
-        {error && <div className="error">{error}</div>}
-
-        <div className="form-group">
-          <label>Name:</label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({...formData, name: e.target.value})}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Type:</label>
-          <select
-            value={formData.type}
-            onChange={(e) => setFormData({...formData, type: e.target.value})}
-            required
-          >
-            <option value="">Select Type</option>
-            <option value="Material">Material</option>
-            <option value="Equipment">Equipment</option>
-            <option value="Human">Human</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>Quantity:</label>
-          <input
-            type="number"
-            min="1"
-            value={formData.quantity}
-            onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Supplier Info:</label>
-          <textarea
-            value={formData.supplierInfo}
-            onChange={(e) => setFormData({...formData, supplierInfo: e.target.value})}
-          />
-        </div>
-
-        <button type="submit" disabled={loading}>
-          {loading ? 'Processing...' : editId ? 'Update Resource' : 'Create Resource'}
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Ressources</h1>
+        <button 
+          className="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          onClick={handleCreateResource}
+        >
+          Ajouter Ressource
         </button>
-      </form>
+      </div>
 
-      <div className="resource-list">
-        {resources.map(resource => (
-          <div key={resource.id} className="resource-card">
-            <h3>{resource.name}</h3>
-            <p>Type: {resource.type}</p>
-            <p>Quantity: {resource.quantity}</p>
-            <p>Supplier: {resource.supplierInfo || 'N/A'}</p>
+      <div className="mb-4">
+        <div className="flex space-x-2">
+          <button 
+            onClick={() => setFilter("all")}
+            className={`px-3 py-1 rounded-md ${filter === "all" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Toutes
+          </button>
+          <button 
+            onClick={() => setFilter("available")}
+            className={`px-3 py-1 rounded-md ${filter === "available" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Disponibles
+          </button>
+          <button 
+            onClick={() => setFilter("partial")}
+            className={`px-3 py-1 rounded-md ${filter === "partial" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Partiellement
+          </button>
+          <button 
+            onClick={() => setFilter("unavailable")}
+            className={`px-3 py-1 rounded-md ${filter === "unavailable" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Non disponibles
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredResources.map(resource => (
+          <div key={resource.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <div className="p-4">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-lg font-semibold text-gray-800">{resource.name}</h3>
+                <div className={`px-2 py-1 rounded-md text-xs font-medium ${getAvailabilityColor(resource.availability)}`}>
+                  {resource.availability}
+                </div>
+              </div>
+              
+              <p className="text-gray-600 font-medium mb-3">{resource.role}</p>
+              
+              <div className="text-sm text-gray-500 space-y-1">
+                <p className="flex items-center">
+                  <span className="mr-2">📧</span> {resource.email}
+                </p>
+                <p className="flex items-center">
+                  <span className="mr-2">📞</span> {resource.phone}
+                </p>
+                <p className="flex items-center">
+                  <span className="mr-2">🔧</span> {resource.skills}
+                </p>
+              </div>
+            </div>
             
-            <div className="actions">
-              <button onClick={() => handleEdit(resource)}>Edit</button>
-              <button onClick={() => handleDelete(resource.id)}>Delete</button>
+            <div className="bg-gray-50 px-4 py-3 border-t border-gray-100 flex justify-end space-x-2">
+              <button 
+                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                onClick={() => handleEditResource(resource)}
+              >
+                <span className="mr-1">✏️</span> Modifier
+              </button>
+              <button 
+                className="px-3 py-1 text-sm text-red-600 hover:text-red-800 flex items-center"
+                onClick={() => handleDeleteResource(resource.id)}
+              >
+                <span className="mr-1">🗑️</span> Supprimer
+              </button>
             </div>
           </div>
         ))}
       </div>
+      
+      {filteredResources.length === 0 && (
+        <div className="text-center py-10">
+          <p className="text-gray-500">Aucune ressource trouvée.</p>
+        </div>
+      )}
     </div>
   );
 };
 
 export default ResourceManager;
-
