@@ -11,12 +11,12 @@ function App() {
       {/* Header */}
       <Header />
 
-      <div className="flex flex-1"> {/* Flex container to make sidebar and content fill available height */}
+      <div className="flex flex-1">
         {/* Sidebar */}
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/* Main Content */}
-        <div className="flex-1 p-6 ml-0 lg:ml-64"> {/* Added left margin for sidebar on large screens */}
+        <div className="flex-1 p-6 ml-0 lg:ml-64"> 
           <ProjectManager activeTab={activeTab} />
         </div>
       </div>
