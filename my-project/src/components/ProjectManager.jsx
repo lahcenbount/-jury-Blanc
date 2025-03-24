@@ -65,7 +65,7 @@ const EntityForm = ({ entity, newEntity, setNewEntity, handleSubmit, editingId, 
             <input
               type={field.type || 'text'}
               value={field.name.includes('.') 
-                ? newEntity[field.name.split('.')[0]][field.name.split('.')[1]] || '' 
+                ? newEntity[field.name.split('.')[0]][field.name.split('.')[2]] || '' 
                 : newEntity[field.name] || ''}
               onChange={(e) => {
                 if (field.name.includes('.')) {
@@ -92,7 +92,7 @@ const EntityForm = ({ entity, newEntity, setNewEntity, handleSubmit, editingId, 
     
     {additionalFields}
     
-    <button type="submit" className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+    <button type="submit" className="mt-4 bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-400">
       {editingId ? `Mettre à jour ${entity}` : `Créer ${entity}`}
     </button>
   </form>

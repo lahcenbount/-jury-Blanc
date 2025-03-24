@@ -7,7 +7,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('projects');
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-200 flex flex-col">
       {/* Header */}
       <Header />
 
