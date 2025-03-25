@@ -1,24 +1,38 @@
 import React, { useState } from 'react';
-import Sidebar from './components/Sidebar';
+import Header from './components/Header'; // Importation du composant Header
+import Sidebar from './components/Sidebar'; // Importation du composant Sidebar
 import ProjectManager from './components/ProjectManager';
-import Header from './components/Header';
+import TaskManager from './components/TaskManager';
+import ResourceManager from './components/ResourceManager';
 
 function App() {
   const [activeTab, setActiveTab] = useState('projects');
 
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'projects':
+        return <ProjectManager />;
+      case 'tasks':
+        return <TaskManager />;
+      case 'resources':
+        return <ResourceManager />;
+      default:
+        return <ProjectManager />;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-200 flex flex-col">
-      {/* Header */}
-      <Header />
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* Main Content Area */}
+      <div className="flex-1 p-6 ml-64 lg:ml-64">
+        {/* Header */}
+        <Header />
 
-        {/* Main Content */}
-        <div className="flex-1 p-6 ml-0 lg:ml-64"> 
-          <ProjectManager activeTab={activeTab} />
-        </div>
+        {/* Content */}
+        {renderContent()}
       </div>
     </div>
   );

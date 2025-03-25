@@ -12,14 +12,13 @@ router.post('/', async (req, res) => {
       description,
       startDate,
       endDate,
-      budget,  // Correctly include the budget field
+      budget,  
     });
 
-    // Save the project data and return success message
     await Data.save();
     res.status(201).json({
       message: "Projet créé avec succès",
-      project: Data,  // Return the created project data
+      project: Data,  
     });
   } catch (err) {
     console.error("Erreur lors de l'insertion du projet: ", err);
@@ -44,7 +43,7 @@ router.put('/:id', async (req, res) => {
     const updatedProject = await Project.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }  // Return the updated document
+      { new: true }  // Return the updated document 3la tariçat  fonctin findByIdAndUpdate
     );
 
     if (!updatedProject) {
