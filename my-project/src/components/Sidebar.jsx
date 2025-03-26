@@ -5,6 +5,7 @@ function Sidebar({ activeTab, setActiveTab }) {
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+    
   };
 
   return (
