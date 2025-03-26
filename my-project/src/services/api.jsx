@@ -1,7 +1,7 @@
-// src/services/api.js
+
 import axios from 'axios';
 
-// Création d'une instance axios avec l'URL de base
+
 const API = axios.create({
   baseURL: 'http://localhost:5001',
   headers: {
@@ -27,7 +27,7 @@ export const resourceService = {
 
 // Services pour les tâches
 export const taskService = {
-  getAll: () => API.get('/Task'),  // Nouvelle méthode getAll()
+  getAll: () => API.get('/Task'),  
   getByProject: (projectId) => API.get(`/Task/project/${projectId}`),
   create: (taskData) => API.post('/Task', taskData),
   update: (id, taskData) => API.put(`/Task/${id}`, taskData),
