@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Header from './components/Header'; // Importation du composant Header
-import Sidebar from './components/Sidebar'; // Importation du composant Sidebar
+import Header from './components/Header'; 
+import Sidebar from './components/Sidebar'; 
 import ProjectManager from './components/ProjectManager';
 import TaskManager from './components/TaskManager';
 import ResourceManager from './components/ResourceManager';
@@ -23,15 +23,13 @@ function App() {
 
   return (
     <div className="flex h-screen">
-      {/* Sidebar */}
+      
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* Main Content Area */}
       <div className="flex-1 p-6 ml-64 lg:ml-64">
-        {/* Header */}
+        
         <Header />
 
-        {/* Content */}
         {renderContent()}
       </div>
     </div>
