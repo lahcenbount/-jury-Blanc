@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 const TaskSchema = new mongoose.Schema({
   description: { 
     type: String, 
-    required: [true, "La description de la tâche est obligatoire"] 
+    required: true, 
   },
   startDate: { 
     type: Date, 
-    required: [true, "La date de début est obligatoire"] 
+    required: true, 
   },
   endDate: Date,
   project: { 

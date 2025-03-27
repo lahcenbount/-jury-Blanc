@@ -3,15 +3,15 @@ const mongoose = require('mongoose');
 const ResourceSchema = new mongoose.Schema({
   name: { 
     type: String, 
-    required: [true, "Le nom de la ressource est obligatoire"] 
+    required: true, 
   },
   type: { 
     type: String,
-    required: [true, "Le type de ressource est obligatoire"]
+    required: true, 
   },
   quantity: { 
     type: Number, 
-    min: [0, "La quantité ne peut pas être négative"],
+    min: 0, 
     required: true 
   },
   supplier: {

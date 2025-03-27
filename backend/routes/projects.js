@@ -29,7 +29,7 @@ router.post('/', async (req, res) => {
 // Lister tous les projets
 router.get('/', async (req, res) => {
   try {
-    const projects = await Project.find()
+    const projects = await Project.find().sort({ startDate: -1 });
     res.json(projects);
   } catch (error) {
     console.error("Erreur lors de la récupération des projets: ", error);

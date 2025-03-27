@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
 // Lister toutes les ressources
 router.get('/', async (req, res) => {
   try {
-    const resources = await Resource.find()
+    const resources = await Resource.find().sort({ name: 1 });
     res.json(resources);
   } catch (error) {
     res.status(500).json({ message: error.message });
